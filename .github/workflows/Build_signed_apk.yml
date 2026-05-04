@@ -1,0 +1,45 @@
+name: Build Signed APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      keyStorePassword:
+        description: 'KeyStore Password'
+        required: true
+        default: 'adka2026'
+      keyAliasPassword:
+        description: 'Key Alias Password'
+        required: true
+        default: 'adka2026'
+      keyAlias:
+        description: 'Key Alias'
+        required: true
+        default: 'aaps'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Build APK
+        run: ./gradlew assembleFullRelease
+        env:
+          RELEASE_STORE_PASSWORD: ${{ github.event.inputs.keyStorePassword }}
+          RELEASE_KEY_PASSWORD: ${{ github.event.inputs.keyAliasPassword }}
+          RELEASE_KEY_ALIAS: ${{ github.event.inputs.keyAlias }}
+          RELEASE_STORE_FILE: 'keystore/aaps.jks'
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: AndroidAPS-Signed-APK
+          path: app/build/outputs/apk/full/release/*.apk
