@@ -1,0 +1,28 @@
+name: Build Signed APK
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+      - name: Build APK
+        run: ./gradlew assembleFullRelease
+        env:
+          RELEASE_STORE_PASSWORD: adka2026
+          RELEASE_KEY_PASSWORD: adka2026
+          RELEASE_KEY_ALIAS: aaps
+          RELEASE_STORE_FILE: 'keystore/aaps.jks'
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: AndroidAPS-Signed-APK
+          path: app/build/outputs/apk/full/release/*.apk
+
